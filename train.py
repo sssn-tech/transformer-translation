@@ -21,7 +21,8 @@ def count_parameters(model):
 
 def initialize_weights(m):
     if hasattr(m, 'weight') and m.weight.dim() > 1:
-        nn.init.kaiming_uniform(m.weight.data)
+        nn.init.kaiming_uniform_(m.weight.data)
+
 
 
 model = Transformer(src_pad_idx=src_pad_idx,
@@ -48,7 +49,6 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
                                                  verbose=True,
                                                  factor=factor,
                                                  patience=patience)
-
 criterion = nn.CrossEntropyLoss(ignore_index=src_pad_idx)
 
 
@@ -56,8 +56,7 @@ def train(model, iterator, optimizer, criterion, clip):
     model.train()
     epoch_loss = 0
     for i, batch in enumerate(iterator):
-        src = batch.src
-        trg = batch.trg
+        src, trg = batch
 
         optimizer.zero_grad()
         output = model(src, trg[:, :-1])
@@ -71,7 +70,6 @@ def train(model, iterator, optimizer, criterion, clip):
 
         epoch_loss += loss.item()
         print('step :', round((i / len(iterator)) * 100, 2), '% , loss :', loss.item())
-
     return epoch_loss / len(iterator)
 
 
@@ -81,8 +79,8 @@ def evaluate(model, iterator, criterion):
     batch_bleu = []
     with torch.no_grad():
         for i, batch in enumerate(iterator):
-            src = batch.src
-            trg = batch.trg
+            src, trg = batch
+            
             output = model(src, trg[:, :-1])
             output_reshape = output.contiguous().view(-1, output.shape[-1])
             trg = trg[:, 1:].contiguous().view(-1)
@@ -109,22 +107,22 @@ def evaluate(model, iterator, criterion):
 
 
 def run(total_epoch, best_loss):
-    train_losses, test_losses, bleus = [], [], []
+    train_losses, test_losses, bleus = [], [], []  
     for step in range(total_epoch):
-        start_time = time.time()
-        train_loss = train(model, train_iter, optimizer, criterion, clip)
-        valid_loss, bleu = evaluate(model, valid_iter, criterion)
-        end_time = time.time()
+        start_time = time.time()  
+        train_loss = train(model, train_iter, optimizer, criterion, clip)  
+        valid_loss, bleu = evaluate(model, valid_iter, criterion)  
+        end_time = time.time()  
 
-        if step > warmup:
-            scheduler.step(valid_loss)
+        if step > warmup: 
+            scheduler.step(valid_loss)  
 
         train_losses.append(train_loss)
         test_losses.append(valid_loss)
         bleus.append(bleu)
-        epoch_mins, epoch_secs = epoch_time(start_time, end_time)
+        epoch_mins, epoch_secs = epoch_time(start_time, end_time)  
 
-        if valid_loss < best_loss:
+        if valid_loss < best_loss and step % 50 == 0:
             best_loss = valid_loss
             torch.save(model.state_dict(), 'saved/model-{0}.pt'.format(valid_loss))
 
