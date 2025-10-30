@@ -1,7 +1,5 @@
-## dataset ignore
-data/
+.ipynb_checkpoints/
 venv/
-.data/
 *.pt
-__pycache__
-result/
+__pycache__/
+
