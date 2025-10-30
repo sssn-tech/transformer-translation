@@ -97,7 +97,7 @@ def evaluate(model, iterator, criterion):
                     bleu = get_bleu(hypotheses=output_words.split(), reference=trg_words.split())
                     total_bleu.append(bleu)
                 except:
-                    pass
+                    print(f"BLEU failure on sample No.{j} : {e}")
 
             total_bleu = sum(total_bleu) / len(total_bleu)
             batch_bleu.append(total_bleu)
