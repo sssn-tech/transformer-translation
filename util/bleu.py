@@ -46,11 +46,23 @@ def get_bleu(hypotheses, reference):
     return 100 * bleu(stats)
 
 
-def idx_to_word(x, vocab):
+def idx_to_word(x, vocab_transform):
     words = []
+
+    if not hasattr(vocab_transform, 'itos') or vocab_transform.itos is None:
+        raise AttributeError("VocabTransform does not have 'itos' (index-to-token mapping) built. "
+                             "Did you forget to call build_vocab()?")
+
     for i in x:
-        word = vocab.itos[i]
-        if '<' not in word:
-            words.append(word)
-    words = " ".join(words)
-    return words
+        idx = int(i)
+        try:
+            if 0 <= idx < len(vocab_transform.itos):
+                word = vocab_transform.itos[idx]
+            else:
+                word = '<unk>'
+            if '<' not in word:
+                words.append(word)
+        except Exception as e:
+            print(f"[idx_to_word error] index: {idx}, error: {e}")
+            words.append('<unk>')
+    return " ".join(words)

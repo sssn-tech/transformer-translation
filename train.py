@@ -46,7 +46,6 @@ optimizer = Adam(params=model.parameters(),
                  eps=adam_eps)
 
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
-                                                 verbose=True,
                                                  factor=factor,
                                                  patience=patience)
 criterion = nn.CrossEntropyLoss(ignore_index=src_pad_idx)
@@ -80,30 +79,32 @@ def evaluate(model, iterator, criterion):
     with torch.no_grad():
         for i, batch in enumerate(iterator):
             src, trg = batch
-            
+
             output = model(src, trg[:, :-1])
             output_reshape = output.contiguous().view(-1, output.shape[-1])
-            trg = trg[:, 1:].contiguous().view(-1)
+            trg_flat = trg[:, 1:].contiguous().view(-1)
 
-            loss = criterion(output_reshape, trg)
+            loss = criterion(output_reshape, trg_flat)
             epoch_loss += loss.item()
 
             total_bleu = []
-            for j in range(batch_size):
+            for j in range(trg.shape[0]):
                 try:
-                    trg_words = idx_to_word(batch.trg[j], loader.target.vocab)
-                    output_words = output[j].max(dim=1)[1]
-                    output_words = idx_to_word(output_words, loader.target.vocab)
+                    trg_words = idx_to_word(trg[j], loader.target)     
+                    output_words = output[j].max(dim=1)[1]              
+                    output_words = idx_to_word(output_words, loader.target)
+                    # output_words = idx_to_word(output_words, loader.target.vocab)
                     bleu = get_bleu(hypotheses=output_words.split(), reference=trg_words.split())
                     total_bleu.append(bleu)
-                except:
+                except Exception as e:
                     print(f"BLEU failure on sample No.{j} : {e}")
 
-            total_bleu = sum(total_bleu) / len(total_bleu)
-            batch_bleu.append(total_bleu)
+            if total_bleu:
+                avg_bleu = sum(total_bleu) / len(total_bleu)
+                batch_bleu.append(avg_bleu)
 
-    batch_bleu = sum(batch_bleu) / len(batch_bleu)
-    return epoch_loss / len(iterator), batch_bleu
+    batch_bleu_score = sum(batch_bleu) / len(batch_bleu) if batch_bleu else 0
+    return epoch_loss / len(iterator), batch_bleu_score
 
 
 def run(total_epoch, best_loss):
@@ -116,6 +117,8 @@ def run(total_epoch, best_loss):
 
         if step > warmup: 
             scheduler.step(valid_loss)  
+            current_lr = optimizer.param_groups[0]['lr']
+            print(f'Current Learning Rate: {current_lr}')
 
         train_losses.append(train_loss)
         test_losses.append(valid_loss)

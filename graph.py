@@ -36,6 +36,8 @@ def draw(mode):
     plt.ylabel(mode)
     plt.title('training result')
     plt.grid(True, which='both', axis='both')
+    
+    plt.savefig(f'./result/{mode}_plot.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 

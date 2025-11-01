@@ -1,5 +1,5 @@
+.ipynb_checkpoints/
 venv/
 *.pt
-__pycache__
-result/
-.vscode/
+__pycache__/
+
