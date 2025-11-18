@@ -1,6 +1,14 @@
-### WARNING
-This code was written in 2019, and I was not very familiar with transformer model in that time.
-So don't trust this code too much. Currently I am not managing this code well, so please open pull requests if you find bugs in the code and want to fix.
+### 项目简介
+
+这是原仓库https://github.com/hyunwoongko/transformer 的fork, 原仓库实现了一个pytorch-scratch的transformer机器翻译任务(vs multi30k数据集)
+这个仓库相比原仓库
+- 迁移python版本到当前主流版本(python 3.8 - python 3.12都可以)
+- 修复了数据集下载问题
+- 修复了若干杂项deprecated问题
+
+结果测试可以直接跑通
+
+### Original README.md:
 
 # Transformer
 My own implementation Transformer model (Attention is All You Need - Google Brain, 2017)
