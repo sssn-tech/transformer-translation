@@ -5,10 +5,17 @@
 - 迁移python版本到当前主流版本(python 3.8 - python 3.12都可以)
 - 修复了数据集下载问题
 - 修复了若干杂项deprecated问题
+结果和原仓库高度一致, 并且可以直接运行
 
-结果测试可以直接跑通
+This is a fork repo from https://github.com/hyunwoongko/transformer. The original repo implemented a pytorch scratch transformer machine translation task (vs multi30k dataset).
 
-### Original README.md:
+This fork:
+- Migrated the Python version to the current mainstream version (Python 3.8- Python 3.12 are all acceptable)
+- Fixed dataset download issue
+- Fixed several miscellaneous deprecated issues
+The results are highly consistent with the original implementation, and can run directly.
+
+Original README.md:
 
 # Transformer
 My own implementation Transformer model (Attention is All You Need - Google Brain, 2017)
